@@ -1,0 +1,79 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+import sys
+import re
+
+NUMBER_CONSTANT = {0:'zero', 1:'one', 2:'two', 3:'three', 4:'four', 5:'five', 6:'six', 7:'seven',
+                8:'eight', 9:'nine', 10:'ten', 11:'eleven', 12:'twelve', 13:'thirteen',
+                14:'fourteen', 15:'fifteen', 16:'sixteen', 17:'seventeen', 18:'eighteen', 19:'nineteen',}
+
+NUMBER_CONSTANT2 = {2:'twenty', 3:'thirty', 4:'forty', 5:'fifty', 6:'sixty', 7:'seventy',
+                8:'eighty', 9:'ninety'}
+
+BASE_CONSTANT = {1:'', 2:'thousand', 3:'million', 4:'billion'}
+
+def translateNumberBelow20(number):
+    return NUMBER_CONSTANT[int(number)]
+
+def translateNumberBelow100(number):
+    if int(number) % 10 == 0:
+        return NUMBER_CONSTANT2[int(number[0])]
+    else:
+        return NUMBER_CONSTANT2[int(number[0])] + ' ' + NUMBER_CONSTANT[int(number[1])]
+
+def translateNumberBelow1000(number):
+    if int(number) % 100 == 0:
+        return NUMBER_CONSTANT[int(number[0])] + ' hundred'
+    else:
+        return NUMBER_CONSTANT[int(number[0])] + ' hundred ' + translateNumberBelow100(number[1:])
+
+def translateInteger(number):
+    if int(number) < 20:
+        return translateNumberBelow20(number)
+    elif int(number) < 100:
+        return translateNumberBelow100(number)
+    else:
+        return translateNumberBelow1000(number)
+
+def translateDecimal(number):
+    result = ''
+    for i in number:
+        result += NUMBER_CONSTANT[int(i)] + ' '
+    return result
+
+def translateNumber(number):
+    result = ''
+    if '.' in number:
+        integer = number.split('.')[0]
+        decimal = number.split('.')[1]
+        integer = format(int(integer), ',')
+        numberGroup = integer.split(',')
+        index = len(numberGroup)
+        for i in numberGroup:
+            result += translateInteger(i) + ' ' + BASE_CONSTANT[index] + ' '
+            index -= 1
+        result = result[:-1] + 'point ' + translateDecimal(decimal)
+    else:
+        integer = format(int(number), ',')
+        numberGroup = integer.split(',')
+        index = len(numberGroup)
+        for i in numberGroup:
+            result += translateInteger(i) + ' ' + BASE_CONSTANT[index] + ' '
+            index -= 1
+    return result.capitalize()
+
+def checkParameter(number):
+    pattern = r'^[1-9]\d*\.?\d*$'
+    result = re.match(pattern, number)
+    if result:
+        return True
+    else:
+        return False
+
+if __name__ == '__main__':
+    number = sys.argv[1]
+    if checkParameter(number):
+        print(translateNumber(number))
+    else:
+        sys.exit(1)
